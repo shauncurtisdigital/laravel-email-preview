@@ -1,0 +1,28 @@
+# Composer
+/vendor/
+composer.lock
+
+# PHPUnit
+.phpunit.cache
+.phpunit.result.cache
+build/
+
+# IDE & Editors
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.phpstorm.meta.php
+_ide_helper.php
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.backup
+.env.production
+
+# Ignore testbench files
+testbench.yaml
