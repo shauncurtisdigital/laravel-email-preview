@@ -11,8 +11,26 @@ A Laravel package to preview and send email templates in non-production environm
 
 ## Installation
 
+Add the following lines to `composer.json`
+
 ```bash
-composer require shauncurtis/laravel-email-preview --dev
+{
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/shauncurtisdigital/laravel-email-preview.git"
+        }
+    ],
+    "require-dev": {
+        "shauncurtis/laravel-email-preview": "dev-main"
+    },
+}
+```
+
+Then run
+
+```bash
+composer update shauncurtis/laravel-email-preview
 ```
 
 Publish the config file (optional):
@@ -52,7 +70,7 @@ Edit `config/email-preview.php` to add your email templates.
 
 ### Dynamic Example (Using Closures)
 
-⚠️ **Important**: Closures cannot be cached. If you use closures in your config, do not run `php artisan config:cache` or `php artisan optimize`.
+**Important**: Closures cannot be cached. If you use closures in your config, do not run `php artisan config:cache` or `php artisan optimize`.
 
 ```php
 'previews' => [
