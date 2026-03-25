@@ -46,10 +46,10 @@
             <tr>
                 <td><strong>{{ $preview['label'] }}</strong></td>
                 <td>
-                    <a href="{{ route('email-preview.show', $preview['key']) }}" target="_blank" class="contrast">Preview</a>
-                    <form action="{{ route('email-preview.send', $preview['key']) }}" method="POST" style="display:inline">
+                    <a href="{{ route('email-preview.show', $preview['key']) }}" target="_blank" role="button" class="outline">Preview</a>
+                    <form action="{{ route('email-preview.send', $preview['key']) }}" method="POST" style="display:inline; margin:0;">
                         @csrf
-                        <button type="submit">Send to {{ config('email-preview.default_to', 'test recipient') }}</button>
+                        <button type="submit" class="outline">Send to {{ config('email-preview.default_to', 'test recipient') }}</button>
                     </form>
                 </td>
             </tr>
