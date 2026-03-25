@@ -1,17 +1,19 @@
 # Laravel Email Preview
 
-A Laravel package to preview and send email templates in non-production environments.
+A Laravel package for previewing and testing emails in development environments. Supports both **Blade view** emails and **Laravel Mailable** emails.
 
 ## Features
-- Preview any Blade email template in the browser
-- Send test emails to configurable recipients
-- Only enabled in safe environments (local, testing, staging)
-- Configurable route prefix and middleware
-- Support for dynamic test data via closures
+
+- 📧 Preview emails in your browser before sending
+- 🔒 Safe by default - only works in configured environments
+- 🎨 Supports both Blade views and Laravel Mailables
+- 📤 Send test emails to configured recipients
+- 🔧 Serializable config (compatible with Laravel config caching)
+- 🎯 Simple class-based preview definitions
 
 ## Installation
 
-Add the following lines to `composer.json`
+Add the following lines to `composer.json`:
 
 ```bash
 {
@@ -27,13 +29,13 @@ Add the following lines to `composer.json`
 }
 ```
 
-Then run
+Then run:
 
 ```bash
 composer update shauncurtis/laravel-email-preview
 ```
 
-Publish the config file (optional):
+Publish the config file:
 
 ```bash
 php artisan vendor:publish --provider="ShaunCurtis\\EmailPreview\\EmailPreviewServiceProvider" --tag=config
@@ -41,91 +43,157 @@ php artisan vendor:publish --provider="ShaunCurtis\\EmailPreview\\EmailPreviewSe
 
 ## Configuration
 
-Edit `config/email-preview.php` to add your email templates.
-
-### Basic Example (Static Data)
+Update `config/email-preview.php`:
 
 ```php
-'previews' => [
-    'welcome' => [
-        'label' => 'Welcome Email',
-        'view' => 'emails.welcome',
-        'subject' => 'Welcome to Our Platform',
-        'data' => [
-            'name' => 'John Doe',
-            'email' => 'john@example.com',
-        ],
+return [
+    'enabled' => env('EMAIL_PREVIEW_ENABLED', true),
+    
+    'environments' => ['local', 'testing', 'staging'],
+    
+    'route_prefix' => 'email-preview',
+    
+    'middleware' => ['web'],
+    
+    'default_to' => env('TEST_EMAIL_ADDRESS', 'test@example.com'),
+    
+    'previews' => [
+        'password-reset' => \App\MailPreviews\PasswordResetPreview::class,
+        'welcome' => \App\MailPreviews\WelcomePreview::class,
     ],
-    'password-reset' => [
-        'label' => 'Password Reset',
-        'view' => 'emails.password-reset',
-        'subject' => 'Reset Your Password',
-        'data' => [
-            'name' => 'Jane Smith',
-            'reset_url' => 'https://example.com/reset-password/sample-token',
-        ],
-    ],
-],
+];
 ```
 
-### Dynamic Example (Using Closures)
+Set your test email address in `.env`:
 
-**Important**: Closures cannot be cached. If you use closures in your config, do not run `php artisan config:cache` or `php artisan optimize`.
-
-```php
-'previews' => [
-    'welcome' => [
-        'label' => 'Welcome Email',
-        'view' => 'emails.welcome',
-        'subject' => 'Welcome to Our Platform',
-        'data' => fn () => [
-            'name' => fake()->name(),
-            'email' => fake()->safeEmail(),
-        ],
-    ],
-],
+```env
+EMAIL_PREVIEW_ENABLED=true
+TEST_EMAIL_ADDRESS=your-email@example.com
 ```
 
-### Production-Ready Approach
+## Creating Preview Classes
 
-For applications that use config caching (staging/production), register previews in a service provider instead:
+### 1. View-Based Preview (Plain Blade Templates)
+
+For simple Blade HTML email templates:
 
 ```php
-// app/Providers/AppServiceProvider.php
-public function boot()
+<?php
+
+namespace App\MailPreviews;
+
+use ShaunCurtis\EmailPreview\Contracts\EmailPreview;
+use ShaunCurtis\EmailPreview\Data\PreviewResult;
+
+class PasswordResetPreview implements EmailPreview
 {
-    if (app()->environment(['local', 'staging'])) {
-        config([
-            'email-preview.previews' => [
-                'welcome' => [
-                    'label' => 'Welcome Email',
-                    'view' => 'emails.welcome',
-                    'subject' => 'Welcome!',
-                    'data' => fn () => [
-                        'name' => \App\Models\User::first()?->name ?? 'Test User',
-                    ],
-                ],
+    public function label(): string
+    {
+        return 'Password Reset Email';
+    }
+
+    public function build(): PreviewResult
+    {
+        return PreviewResult::fromView(
+            view: 'emails.password-reset',
+            data: [
+                'name' => 'John Doe',
+                'email' => 'john@example.com',
+                'reset_url' => url('/reset-password/sample-token'),
             ],
-        ]);
+            subject: 'Reset Your Password'
+        );
     }
 }
 ```
 
-### Configuration Options
+### 2. Mailable-Based Preview (Laravel Mailables)
 
-- `enabled` - Enable/disable the package (default: true, via `MAIL_PREVIEW_ENABLED`)
-- `environments` - Allowed environments (default: `['local', 'testing', 'staging']`)
-- `route_prefix` - URL prefix for routes (default: `'email-preview'`)
-- `middleware` - Middleware to apply to routes (default: `['web']`)
-- `test_recipient` - Default email address for sending tests (via `TEST_EMAIL_ADDRESS`)
-- `previews` - Array of email templates to preview
+For projects using Laravel Mailables and Markdown mail:
+
+```php
+<?php
+
+namespace App\MailPreviews;
+
+use App\Mail\WelcomeMail;
+use ShaunCurtis\EmailPreview\Contracts\EmailPreview;
+use ShaunCurtis\EmailPreview\Data\PreviewResult;
+
+class WelcomePreview implements EmailPreview
+{
+    public function label(): string
+    {
+        return 'Welcome Email';
+    }
+
+    public function build(): PreviewResult
+    {
+        $mailable = new WelcomeMail(
+            userName: 'Jane Smith',
+            loginUrl: url('/login'),
+        );
+
+        return PreviewResult::fromMailable($mailable);
+    }
+}
+```
 
 ## Usage
 
-Visit `/email-preview` in your browser (only in allowed environments).
+Once configured, visit:
 
-- Click "Preview" to see the rendered email in your browser
-- Click "Send" to send the email to the configured test recipient
+```
+http://your-app.test/email-preview
+```
+
+You'll see:
+- A list of all configured email previews
+- **Preview** button - opens the email in a new tab
+- **Send** button - sends the email to your test address
+
+## Routes
+
+The package registers these routes:
+
+- `GET /email-preview` - List all previews
+- `GET /email-preview/{preview}` - Preview specific email
+- `POST /email-preview/{preview}/send` - Send test email
+
+## Security
+
+The package is safe by default:
+
+✅ Only enabled in configured environments  
+✅ Routes not registered in production  
+✅ Test emails only sent to configured address  
+✅ No config caching issues (serializable config)
+
+For additional security in staging, add authentication:
+
+```php
+// config/email-preview.php
+'middleware' => ['web', 'auth'],
+```
+
+## Legacy Array Format (Backward Compatible)
+
+For simple cases, you can still use array configuration:
+
+```php
+'previews' => [
+    'welcome' => [
+        'label' => 'Welcome Email',
+        'view' => 'emails.welcome',
+        'subject' => 'Welcome!',
+        'data' => [
+            'name' => 'John Doe',
+        ],
+    ],
+],
+```
+
+⚠️ **Note:** Closures are NOT supported in config (breaks config caching). Use preview classes for dynamic data.
 
 ## Troubleshooting
 
@@ -134,31 +202,21 @@ Visit `/email-preview` in your browser (only in allowed environments).
 If you get a 404 when visiting `/email-preview`:
 
 1. Ensure the package is in an allowed environment (check `APP_ENV` in `.env`)
-2. Verify `MAIL_PREVIEW_ENABLED=true` in your `.env`
+2. Verify `EMAIL_PREVIEW_ENABLED=true` in your `.env`
 3. Clear your config cache: `php artisan config:clear`
-4. Check that you've published the config and added at least one preview
+4. Check that you've added at least one preview
 
 ### Config Cache Error
 
-If you see "value is non-serializable" when running `php artisan config:cache`:
+The new class-based approach is fully compatible with `php artisan config:cache`. Legacy array format (without closures) is also compatible.
 
-- You're using closures in your config file
-- Either:
-  - Use static arrays instead of closures, OR
-  - Move preview definitions to a service provider (see "Production-Ready Approach" above), OR
-  - Don't cache config in local/staging environments
+If you see serialization errors, ensure you're not using closures in your config file.
 
-## Security
+## Requirements
 
-This package is designed for non-production environments only:
-- Routes are only registered when `enabled` is true AND the current environment is in the allowed list
-- Emails can only be sent to the configured `test_recipient` (not arbitrary addresses)
-- Consider adding authentication middleware in staging environments:
-
-```php
-// config/email-preview.php
-'middleware' => ['web', 'auth'],
-```
+- PHP 8.1+
+- Laravel 10.x or 11.x
 
 ## License
+
 MIT

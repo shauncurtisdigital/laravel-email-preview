@@ -42,14 +42,14 @@
             </tr>
         </thead>
         <tbody>
-        @forelse($previews as $type => $preview)
+        @forelse($previews as $preview)
             <tr>
-                <td><strong>{{ $preview['label'] ?? $type }}</strong></td>
+                <td><strong>{{ $preview['label'] }}</strong></td>
                 <td>
-                    <a href="{{ route('email-preview.show', $type) }}" target="_blank" class="contrast">Preview</a>
-                    <form action="{{ route('email-preview.send', $type) }}" method="POST" style="display:inline">
+                    <a href="{{ route('email-preview.show', $preview['key']) }}" target="_blank" class="contrast">Preview</a>
+                    <form action="{{ route('email-preview.send', $preview['key']) }}" method="POST" style="display:inline">
                         @csrf
-                        <button type="submit">Send to {{ config('email-preview.test_recipient', 'test recipient') }}</button>
+                        <button type="submit">Send to {{ config('email-preview.default_to', 'test recipient') }}</button>
                     </form>
                 </td>
             </tr>
