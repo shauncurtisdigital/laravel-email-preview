@@ -45,11 +45,11 @@
         @forelse($previews as $preview)
             <tr>
                 <td><strong>{{ $preview['label'] }}</strong></td>
-                <td>
-                    <a href="{{ route('email-preview.show', $preview['key']) }}" target="_blank" role="button" class="outline">Preview</a>
-                    <form action="{{ route('email-preview.send', $preview['key']) }}" method="POST" style="display:inline; margin:0;">
+                <td style="white-space: nowrap;">
+                    <a href="{{ route('email-preview.show', $preview['key']) }}" target="_blank" role="button" class="outline" style="display: inline-block; margin-right: 0.5rem;">Preview</a>
+                    <form action="{{ route('email-preview.send', $preview['key']) }}" method="POST" style="display: inline-block; margin: 0;">
                         @csrf
-                        <button type="submit" class="outline">Send to {{ config('email-preview.default_to', 'test recipient') }}</button>
+                        <button type="submit" class="outline" style="margin: 0;">Send test email</button>
                     </form>
                 </td>
             </tr>
