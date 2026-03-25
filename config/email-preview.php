@@ -3,6 +3,7 @@
 return [
     'enabled' => env('MAIL_PREVIEW_ENABLED', true),
     'environments' => ['local', 'testing', 'staging'],
+    'route_prefix' => 'email-preview',
     'middleware' => ['web'],
     'test_recipient' => env('TEST_EMAIL_ADDRESS'),
 

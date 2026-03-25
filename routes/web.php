@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use ShaunCurtis\EmailPreview\Http\Controllers\EmailPreviewController;
 
 Route::group([
-    'prefix' => 'email-preview',
+    'prefix' => config('email-preview.route_prefix', 'email-preview'),
     'middleware' => config('email-preview.middleware', ['web']),
 ], function () {
     Route::get('/', [EmailPreviewController::class, 'index'])->name('email-preview.index');

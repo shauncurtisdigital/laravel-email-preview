@@ -19,7 +19,9 @@ class EmailPreviewServiceProvider extends ServiceProvider
             ], 'config');
         }
 
-        $enabled = in_array($this->app->environment(), config('email-preview.enabled_environments', []));
+        $enabled = config('email-preview.enabled', true) && 
+                   in_array($this->app->environment(), config('email-preview.environments', []));
+        
         if ($enabled) {
             $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
             $this->loadViewsFrom(__DIR__.'/../resources/views', 'email-preview');

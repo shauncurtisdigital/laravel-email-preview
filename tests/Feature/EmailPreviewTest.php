@@ -49,8 +49,8 @@ class EmailPreviewTest extends TestCase
     public function test_send_route_sends_email()
     {
         Mail::fake();
-        $response = $this->post('/email-preview/test-email/send', ['to' => 'test@example.com']);
+        $response = $this->post('/email-preview/test-email/send');
         $response->assertRedirect('/email-preview');
-        $response->assertSessionHas('status', 'Email sent!');
+        $response->assertSessionHas('status', 'Email sent to test@example.com!');
     }
 }

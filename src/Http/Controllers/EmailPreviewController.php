@@ -35,14 +35,18 @@ class EmailPreviewController extends Controller
         }
         $preview = $previews[$type];
         $data = is_callable($preview['data']) ? call_user_func($preview['data']) : ($preview['data'] ?? []);
-        $to = $request->input('to', config('email-preview.test_recipient'));
+        
+        // Only send to the configured test recipient for safety
+        $to = config('email-preview.test_recipient');
         if (!$to) {
-            return back()->withErrors(['to' => 'Recipient email required']);
+            return redirect()->route('email-preview.index')->withErrors(['to' => 'No test recipient configured. Set TEST_EMAIL_ADDRESS in your .env file.']);
         }
+        
         \Mail::send($preview['view'], $data, function ($message) use ($to, $preview) {
             $message->to($to)
                 ->subject($preview['subject'] ?? 'Email Preview');
         });
-        return redirect()->route('email-preview.index')->with('status', 'Email sent!');
+        
+        return redirect()->route('email-preview.index')->with('status', "Email sent to {$to}!");
     }
 }
