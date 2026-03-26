@@ -18,7 +18,7 @@
 <body>
 <main class="container">
     <div class="warning-banner">
-        ⚠️ NON-PRODUCTION ENVIRONMENT ONLY - {{ strtoupper(app()->environment()) }}
+        NON-PRODUCTION ENVIRONMENT ONLY - {{ strtoupper(app()->environment()) }}
     </div>
     
     <h1>Email Preview</h1>

@@ -4,12 +4,12 @@ A Laravel package for previewing and testing emails in development environments.
 
 ## Features
 
-- 📧 Preview emails in your browser before sending
-- 🔒 Safe by default - only works in configured environments
-- 🎨 Supports both Blade views and Laravel Mailables
-- 📤 Send test emails to configured recipients
-- 🔧 Serializable config (compatible with Laravel config caching)
-- 🎯 Simple class-based preview definitions
+- Preview emails in your browser before sending
+- Safe by default - only works in configured environments
+- Supports both Blade views and Laravel Mailables
+- Send test emails to configured recipients
+- Serializable config (compatible with Laravel config caching)
+- Simple class-based preview definitions
 
 ## Installation
 
@@ -164,10 +164,10 @@ The package registers these routes:
 
 The package is safe by default:
 
-✅ Only enabled in configured environments  
-✅ Routes not registered in production  
-✅ Test emails only sent to configured address  
-✅ No config caching issues (serializable config)
+Only enabled in configured environments  
+Routes not registered in production  
+Test emails only sent to configured address  
+No config caching issues (serializable config)
 
 For additional security in staging, add authentication:
 
@@ -193,7 +193,7 @@ For simple cases, you can still use array configuration:
 ],
 ```
 
-⚠️ **Note:** Closures are NOT supported in config (breaks config caching). Use preview classes for dynamic data.
+**Note:** Closures are NOT supported in config (breaks config caching). Use preview classes for dynamic data.
 
 ## Troubleshooting
 
@@ -216,7 +216,3 @@ If you see serialization errors, ensure you're not using closures in your config
 
 - PHP 8.1+
 - Laravel 10.x or 11.x
-
-## License
-
-MIT
